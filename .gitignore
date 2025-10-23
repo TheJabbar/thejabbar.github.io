@@ -205,3 +205,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+#AI Scripts
+*extract_publications.py
+*extract_publications2.py
