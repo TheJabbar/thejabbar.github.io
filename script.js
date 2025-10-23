@@ -141,14 +141,15 @@ function createBackToTopButton() {
 // Initialize back to top button
 document.addEventListener('DOMContentLoaded', createBackToTopButton);
 
-// Framework wordcloud animation with grid-based positioning to prevent overlaps
+// Framework wordcloud animation with physics-based repulsion to prevent overlaps
 document.addEventListener('DOMContentLoaded', function() {
     const wordcloud = document.getElementById('frameworks-wordcloud');
     if (wordcloud) {
         const words = Array.from(wordcloud.querySelectorAll('.word'));
+        let animationFrameId;
         
-        // Grid-based positioning to ensure no overlaps
-        function positionWords() {
+        // Initialize words with random positions
+        function initializePositions() {
             // Set all words to visibility hidden first to measure their natural sizes
             words.forEach(word => {
                 word.style.visibility = 'hidden';
@@ -157,62 +158,126 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Wait for words to render with their natural sizes, then position them
             setTimeout(() => {
-                // Calculate container dimensions after it's rendered
-                const containerWidth = wordcloud.offsetWidth || 800; // fallback value
+                const containerWidth = wordcloud.offsetWidth || 800;
                 const containerHeight = wordcloud.offsetHeight || 350;
                 
-                // Calculate grid size based on number of words and their average size
-                const cellSize = 120; // Base size for each cell
-                const cols = Math.floor(containerWidth / cellSize);
-                const rows = Math.floor(containerHeight / cellSize);
-                const totalCells = cols * rows;
-                
-                // Create an array of available grid positions
-                let availablePositions = [];
-                for (let row = 0; row < rows; row++) {
-                    for (let col = 0; col < cols; col++) {
-                        availablePositions.push({row, col});
-                    }
-                }
-                
-                // Shuffle the positions array to randomize placement
-                for (let i = availablePositions.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [availablePositions[i], availablePositions[j]] = [availablePositions[j], availablePositions[i]];
-                }
-                
-                // Position each word in a unique grid cell
                 words.forEach((word, index) => {
-                    if (index < availablePositions.length) {
-                        const pos = availablePositions[index];
-                        const left = (pos.col * cellSize) + (cellSize - word.offsetWidth) / 2;
-                        const top = (pos.row * cellSize) + (cellSize - word.offsetHeight) / 2;
-                        
-                        // Add some random offset within the cell to make it look more natural
-                        const randomOffsetX = (Math.random() - 0.5) * (cellSize - word.offsetWidth);
-                        const randomOffsetY = (Math.random() - 0.5) * (cellSize - word.offsetHeight);
-                        
-                        word.style.left = `${Math.max(5, Math.min(containerWidth - word.offsetWidth - 5, left + randomOffsetX))}px`;
-                        word.style.top = `${Math.max(5, Math.min(containerHeight - word.offsetHeight - 5, top + randomOffsetY))}px`;
-                        word.style.visibility = 'visible';
-                    } else {
-                        // If we run out of grid cells, position randomly but ensure they're visible
-                        const left = Math.random() * (containerWidth - word.offsetWidth - 20) + 10;
-                        const top = Math.random() * (containerHeight - word.offsetHeight - 20) + 10;
-                        word.style.left = `${left}px`;
-                        word.style.top = `${top}px`;
-                        word.style.visibility = 'visible';
-                    }
+                    // Position randomly in the container, ensuring they're inside the bounds
+                    const maxX = containerWidth - word.offsetWidth - 10;
+                    const maxY = containerHeight - word.offsetHeight - 10;
+                    
+                    const left = Math.max(5, Math.random() * maxX);
+                    const top = Math.max(5, Math.random() * maxY);
+                    
+                    word.style.left = `${left}px`;
+                    word.style.top = `${top}px`;
+                    word.style.visibility = 'visible';
                 });
-            }, 100);
+                
+                // Start the physics simulation after positioning
+                startPhysicsSimulation();
+            }, 50);
         }
         
-        // Initially position all words
-        positionWords();
+        // Physics simulation to separate overlapping words
+        function startPhysicsSimulation() {
+            function physicsStep() {
+                const containerRect = wordcloud.getBoundingClientRect();
+                const containerWidth = containerRect.width || 800;
+                const containerHeight = containerRect.height || 350;
+                
+                // Calculate repulsion forces between overlapping words
+                for (let i = 0; i < words.length; i++) {
+                    const word1 = words[i];
+                    if (word1.style.visibility !== 'visible') continue;
+                    
+                    const rect1 = word1.getBoundingClientRect();
+                    const word1Pos = {
+                        x: parseFloat(word1.style.left) || 0,
+                        y: parseFloat(word1.style.top) || 0,
+                        width: rect1.width,
+                        height: rect1.height
+                    };
+                    
+                    // Apply repulsion from other words
+                    for (let j = i + 1; j < words.length; j++) {
+                        const word2 = words[j];
+                        if (word2.style.visibility !== 'visible') continue;
+                        
+                        const rect2 = word2.getBoundingClientRect();
+                        const word2Pos = {
+                            x: parseFloat(word2.style.left) || 0,
+                            y: parseFloat(word2.style.top) || 0,
+                            width: rect2.width,
+                            height: rect2.height
+                        };
+                        
+                        // Check for collision
+                        if (rect1.left < rect2.right && rect1.right > rect2.left && 
+                            rect1.top < rect2.bottom && rect1.bottom > rect2.top) {
+                            
+                            // Calculate the overlap and repulsion force
+                            const dx = word2Pos.x - word1Pos.x;
+                            const dy = word2Pos.y - word1Pos.y;
+                            const distance = Math.max(0.1, Math.sqrt(dx * dx + dy * dy));
+                            
+                            // Normalize and apply repulsion force
+                            const force = 2.0; // Repulsion strength
+                            const moveX = (dx / distance) * force;
+                            const moveY = (dy / distance) * force;
+                            
+                            // Move both words away from each other
+                            let newLeft1 = word1Pos.x - moveX;
+                            let newTop1 = word1Pos.y - moveY;
+                            let newLeft2 = word2Pos.x + moveX;
+                            let newTop2 = word2Pos.y + moveY;
+                            
+                            // Keep words within container bounds
+                            newLeft1 = Math.max(0, Math.min(containerWidth - word1Pos.width - 5, newLeft1));
+                            newTop1 = Math.max(0, Math.min(containerHeight - word1Pos.height - 5, newTop1));
+                            newLeft2 = Math.max(0, Math.min(containerWidth - word2Pos.width - 5, newLeft2));
+                            newTop2 = Math.max(0, Math.min(containerHeight - word2Pos.height - 5, newTop2));
+                            
+                            word1.style.left = `${newLeft1}px`;
+                            word1.style.top = `${newTop1}px`;
+                            word2.style.left = `${newLeft2}px`;
+                            word2.style.top = `${newTop2}px`;
+                        }
+                    }
+                    
+                    // Apply boundary constraints to keep words inside the container
+                    let currentLeft = parseFloat(word1.style.left) || 0;
+                    let currentTop = parseFloat(word1.style.top) || 0;
+                    
+                    if (currentLeft < 5) currentLeft = 5;
+                    if (currentTop < 5) currentTop = 5;
+                    if (currentLeft > containerWidth - word1Pos.width - 5) {
+                        currentLeft = containerWidth - word1Pos.width - 5;
+                    }
+                    if (currentTop > containerHeight - word1Pos.height - 5) {
+                        currentTop = containerHeight - word1Pos.height - 5;
+                    }
+                    
+                    if (currentLeft !== parseFloat(word1.style.left) || currentTop !== parseFloat(word1.style.top)) {
+                        word1.style.left = `${currentLeft}px`;
+                        word1.style.top = `${currentTop}px`;
+                    }
+                }
+                
+                // Continue the physics simulation
+                animationFrameId = requestAnimationFrame(physicsStep);
+            }
+            
+            // Start the simulation
+            physicsStep();
+        }
         
         // Add mouse enter/leave events for enhanced hover effect
         words.forEach(word => {
             word.addEventListener('mouseenter', function() {
+                // Store original color to restore it later
+                this.originalColor = this.style.color;
+                
                 // Random color changes on hover for more dynamic effect
                 const colors = ['#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f39c12', '#1abc9c', '#d35400', '#34495e', '#e67e22', '#8e44ad'];
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
@@ -221,17 +286,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.style.color = randomColor;
                 this.style.transform = 'scale(1.5) rotate(5deg)';
                 this.style.zIndex = '100';
+                
+                // Pause physics simulation for this element to prevent movement during hover
+                this.style.transition = 'transform 0.3s ease, color 0.2s ease';
             });
             
             word.addEventListener('mouseleave', function() {
                 // Reset to original state
                 this.style.transform = 'scale(1) rotate(0)';
                 this.style.zIndex = '1';
-                this.style.color = ''; // Let CSS handle the default
+                if (this.originalColor) {
+                    this.style.color = this.originalColor;
+                } else {
+                    this.style.color = ''; // Let CSS handle the default
+                }
+                
+                // Resume normal transition
+                this.style.transition = 'transform 0.8s ease, color 0.3s ease, opacity 0.5s ease';
             });
         });
         
-        // Floating animation function that respects spacing
+        // Initially position all words
+        initializePositions();
+        
+        // Floating animation function that works with the physics simulation
         function animateWords() {
             // Only animate if the wordcloud still exists
             if (!document.getElementById('frameworks-wordcloud')) return;
@@ -239,14 +317,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const wordsToAnimate = words.filter(() => Math.random() > 0.6); // Animate ~40% of words
             
             wordsToAnimate.forEach(word => {
+                if (word.style.visibility !== 'visible' || word.matches(':hover')) return;
+                
                 // Get original position
                 const originalLeft = parseFloat(word.style.left) || 0;
                 const originalTop = parseFloat(word.style.top) || 0;
                 
-                // Random floating direction and distance (with limits to prevent collisions)
-                const xMove = (Math.random() - 0.5) * 25; // Reduced movement to maintain spacing
-                const yMove = (Math.random() - 0.5) * 25;
-                const rotation = (Math.random() - 0.5) * 8;
+                // Random floating direction and distance (with limits to maintain spacing)
+                const xMove = (Math.random() - 0.5) * 30; // Moderate movement
+                const yMove = (Math.random() - 0.5) * 30;
+                const rotation = (Math.random() - 0.5) * 10;
                 
                 // Apply the animation
                 word.style.transition = 'transform 2s ease';
@@ -254,7 +334,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Reset position after animation completes
                 setTimeout(() => {
-                    word.style.transform = 'translate(0, 0) rotate(0)';
+                    if (!word.matches(':hover')) { // Only reset if not currently hovered
+                        word.style.transform = 'translate(0, 0) rotate(0)';
+                    }
                 }, 2000);
             });
         }
@@ -263,11 +345,23 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(animateWords, 2000);
         
         // Run the animation periodically
-        setInterval(animateWords, 4000);
+        const animationInterval = setInterval(animateWords, 4000);
+        
+        // Clean up animation frames when leaving the page
+        window.addEventListener('beforeunload', function() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            clearInterval(animationInterval);
+        });
         
         // Re-position words when window resizes
         window.addEventListener('resize', function() {
-            setTimeout(positionWords, 300);
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            clearInterval(animationInterval);
+            initializePositions();
         });
     }
 });
