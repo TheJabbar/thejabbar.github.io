@@ -141,43 +141,65 @@ function createBackToTopButton() {
 // Initialize back to top button
 document.addEventListener('DOMContentLoaded', createBackToTopButton);
 
-// Framework wordcloud animation
+// Framework wordcloud animation with enhanced floating effect
 document.addEventListener('DOMContentLoaded', function() {
     const wordcloud = document.getElementById('frameworks-wordcloud');
     if (wordcloud) {
         const words = wordcloud.querySelectorAll('.word');
         
-        // Add random positions for initial display
+        // Add random initial positions and rotations for a more natural look
         words.forEach((word, index) => {
             // Add subtle animation effect for each word
-            word.style.transition = `transform 0.3s ease, color 0.3s ease`;
+            word.style.transition = `transform 0.8s ease, color 0.3s ease, opacity 0.5s ease`;
             
-            // Add mouse enter/leave events for hover effect
+            // Set initial random position and rotation if using CSS positioning
+            word.style.position = 'absolute';
+            
+            // Add mouse enter/leave events for enhanced hover effect
             word.addEventListener('mouseenter', function() {
                 // Random color changes on hover for more dynamic effect
-                const colors = ['#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f39c12', '#1abc9c', '#d35400', '#34495e', '#e67e22'];
+                const colors = ['#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f39c12', '#1abc9c', '#d35400', '#34495e', '#e67e22', '#8e44ad'];
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Enhance the hover effect
                 this.style.color = randomColor;
+                this.style.transform = 'scale(1.3) rotate(5deg)';
+                this.style.zIndex = '10';
             });
             
             word.addEventListener('mouseleave', function() {
-                // Reset to original color (we'll set these as data attributes later if needed)
-                // For now, we'll just reset to a default
+                // Reset to original state
+                this.style.transform = 'scale(1) rotate(0)';
+                this.style.zIndex = '1';
                 this.style.color = ''; // Let CSS handle the default
             });
         });
         
-        // Add periodic animation to make words gently float
-        setInterval(() => {
+        // Enhanced floating animation function
+        function animateWords() {
             words.forEach(word => {
-                // Randomly choose a few words to slightly animate
-                if (Math.random() > 0.7) { // Only animate 30% of words at any time
-                    word.style.transform = 'translateY(-2px)';
+                // Randomly select words to animate
+                if (Math.random() > 0.6) { // Animate 40% of words at any time
+                    // Random floating direction and distance
+                    const xMove = (Math.random() - 0.5) * 10;
+                    const yMove = (Math.random() - 0.5) * 10;
+                    const rotation = (Math.random() - 0.5) * 5;
+                    
+                    // Apply the animation
+                    word.style.transform = `translate(${xMove}px, ${yMove}px) rotate(${rotation}deg)`;
+                    
+                    // Reset position after animation completes
                     setTimeout(() => {
-                        word.style.transform = 'translateY(0)';
-                    }, 300);
+                        word.style.transform = 'translate(0, 0) rotate(0)';
+                    }, 1500);
                 }
             });
-        }, 2000);
+        }
+        
+        // Initial animation after DOM loads
+        setTimeout(animateWords, 500);
+        
+        // Run the animation periodically
+        setInterval(animateWords, 3000);
     }
 });
