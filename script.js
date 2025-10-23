@@ -140,3 +140,44 @@ function createBackToTopButton() {
 
 // Initialize back to top button
 document.addEventListener('DOMContentLoaded', createBackToTopButton);
+
+// Framework wordcloud animation
+document.addEventListener('DOMContentLoaded', function() {
+    const wordcloud = document.getElementById('frameworks-wordcloud');
+    if (wordcloud) {
+        const words = wordcloud.querySelectorAll('.word');
+        
+        // Add random positions for initial display
+        words.forEach((word, index) => {
+            // Add subtle animation effect for each word
+            word.style.transition = `transform 0.3s ease, color 0.3s ease`;
+            
+            // Add mouse enter/leave events for hover effect
+            word.addEventListener('mouseenter', function() {
+                // Random color changes on hover for more dynamic effect
+                const colors = ['#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f39c12', '#1abc9c', '#d35400', '#34495e', '#e67e22'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                this.style.color = randomColor;
+            });
+            
+            word.addEventListener('mouseleave', function() {
+                // Reset to original color (we'll set these as data attributes later if needed)
+                // For now, we'll just reset to a default
+                this.style.color = ''; // Let CSS handle the default
+            });
+        });
+        
+        // Add periodic animation to make words gently float
+        setInterval(() => {
+            words.forEach(word => {
+                // Randomly choose a few words to slightly animate
+                if (Math.random() > 0.7) { // Only animate 30% of words at any time
+                    word.style.transform = 'translateY(-2px)';
+                    setTimeout(() => {
+                        word.style.transform = 'translateY(0)';
+                    }, 300);
+                }
+            });
+        }, 2000);
+    }
+});

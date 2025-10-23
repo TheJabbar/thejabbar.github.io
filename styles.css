@@ -530,6 +530,45 @@ section {
   color: var(--light-text);
 }
 
+/* Frameworks Wordcloud Section */
+.frameworks {
+  background-color: var(--card-bg);
+}
+
+.wordcloud-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: 2rem;
+}
+
+.wordcloud {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  height: 300px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.word {
+  transition: var(--transition);
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: default;
+}
+
+.word:hover {
+  transform: scale(1.2);
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
 /* Publications Section */
 .publications {
   background-color: var(--bg-color);
