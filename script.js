@@ -141,27 +141,120 @@ function createBackToTopButton() {
 // Initialize back to top button
 document.addEventListener('DOMContentLoaded', createBackToTopButton);
 
-// Framework wordcloud animation with enhanced floating effect
+// Framework wordcloud animation with enhanced floating effect and proper spacing
 document.addEventListener('DOMContentLoaded', function() {
     const wordcloud = document.getElementById('frameworks-wordcloud');
     if (wordcloud) {
-        const words = wordcloud.querySelectorAll('.word');
+        const words = Array.from(wordcloud.querySelectorAll('.word'));
         const containerWidth = wordcloud.offsetWidth;
         const containerHeight = wordcloud.offsetHeight;
         
-        // Position words randomly in the container
+        // Function to check for collision between two words
+        function checkCollision(word1, word2) {
+            const rect1 = word1.getBoundingClientRect();
+            const rect2 = word2.getBoundingClientRect();
+            
+            // Get positions relative to container
+            const pos1 = {
+                left: parseFloat(word1.style.left) || 0,
+                top: parseFloat(word1.style.top) || 0,
+                width: rect1.width,
+                height: rect1.height
+            };
+            
+            const pos2 = {
+                left: parseFloat(word2.style.left) || 0,
+                top: parseFloat(word2.style.top) || 0,
+                width: rect2.width,
+                height: rect2.height
+            };
+            
+            // Check if rectangles overlap
+            return pos1.left < pos2.left + pos2.width + 10 && 
+                   pos1.left + pos1.width + 10 > pos2.left && 
+                   pos1.top < pos2.top + pos2.height + 10 && 
+                   pos1.top + pos1.height + 10 > pos2.top;
+        }
+        
+        // Function to adjust positions to avoid collisions
+        function adjustForCollisions() {
+            for (let i = 0; i < words.length; i++) {
+                for (let j = i + 1; j < words.length; j++) {
+                    if (checkCollision(words[i], words[j])) {
+                        // If collision detected, move one of the words
+                        const xMove = (Math.random() - 0.5) * 50;
+                        const yMove = (Math.random() - 0.5) * 50;
+                        
+                        let newLeft = parseFloat(words[j].style.left) + xMove;
+                        let newTop = parseFloat(words[j].style.top) + yMove;
+                        
+                        // Make sure it stays within container bounds
+                        newLeft = Math.max(10, Math.min(containerWidth - words[j].offsetWidth - 10, newLeft));
+                        newTop = Math.max(10, Math.min(containerHeight - words[j].offsetHeight - 10, newTop));
+                        
+                        words[j].style.left = `${newLeft}px`;
+                        words[j].style.top = `${newTop}px`;
+                    }
+                }
+            }
+        }
+        
+        // Position words with proper spacing using a grid-based approach
         function positionWords() {
+            // First, let each word render to measure its size
             words.forEach(word => {
-                // Random position within the container
-                const maxWidth = containerWidth - 120; // account for word width
-                const maxHeight = containerHeight - 40; // account for word height
-                
-                const leftPos = Math.floor(Math.random() * maxWidth);
-                const topPos = Math.floor(Math.random() * maxHeight);
-                
-                word.style.left = `${leftPos}px`;
-                word.style.top = `${topPos}px`;
+                word.style.visibility = 'hidden';
             });
+            
+            // Make them visible after a short delay so we can measure them
+            setTimeout(() => {
+                words.forEach(word => {
+                    word.style.visibility = 'visible';
+                    // Measure the word dimensions after it's rendered
+                    const wordWidth = word.offsetWidth;
+                    const wordHeight = word.offsetHeight;
+                    
+                    // Calculate safe positioning area (leaving margins)
+                    const maxX = containerWidth - wordWidth - 20;
+                    const maxY = containerHeight - wordHeight - 20;
+                    
+                    // Generate random position
+                    let leftPos = Math.floor(Math.random() * maxX);
+                    let topPos = Math.floor(Math.random() * maxY);
+                    
+                    // Try to find a position that doesn't collide with others
+                    let attempts = 0;
+                    while (attempts < 50) {
+                        word.style.left = `${leftPos}px`;
+                        word.style.top = `${topPos}px`;
+                        
+                        // Check for collisions with other words
+                        let hasCollision = false;
+                        for (let otherWord of words) {
+                            if (otherWord !== word && checkCollision(word, otherWord)) {
+                                hasCollision = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!hasCollision) {
+                            break; // Found a good position
+                        }
+                        
+                        // Try a new position
+                        leftPos = Math.floor(Math.random() * maxX);
+                        topPos = Math.floor(Math.random() * maxY);
+                        attempts++;
+                    }
+                    
+                    // Final position assignment
+                    word.style.left = `${leftPos}px`;
+                    word.style.top = `${topPos}px`;
+                });
+                
+                // Adjust any remaining collisions
+                adjustForCollisions();
+            }, 50);
         }
         
         // Initially position all words
@@ -188,19 +281,15 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Enhanced floating animation function
+        // Enhanced floating animation function with collision awareness
         function animateWords() {
             words.forEach(word => {
                 // Randomly select words to animate
                 if (Math.random() > 0.7) { // Animate 30% of words at any time
                     // Random floating direction and distance
-                    const xMove = (Math.random() - 0.5) * 30; // Increased movement range
-                    const yMove = (Math.random() - 0.5) * 30;
+                    const xMove = (Math.random() - 0.5) * 40; // Increased movement range
+                    const yMove = (Math.random() - 0.5) * 40;
                     const rotation = (Math.random() - 0.5) * 10;
-                    
-                    // Save original position
-                    const originalLeft = parseFloat(word.style.left);
-                    const originalTop = parseFloat(word.style.top);
                     
                     // Apply the animation
                     word.style.transform = `translate(${xMove}px, ${yMove}px) rotate(${rotation}deg)`;
@@ -214,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Initial animation after DOM loads
-        setTimeout(animateWords, 1000);
+        setTimeout(animateWords, 1500);
         
         // Run the animation periodically
         setInterval(animateWords, 3000);
