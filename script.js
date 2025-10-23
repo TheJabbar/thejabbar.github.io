@@ -146,16 +146,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const wordcloud = document.getElementById('frameworks-wordcloud');
     if (wordcloud) {
         const words = wordcloud.querySelectorAll('.word');
+        const containerWidth = wordcloud.offsetWidth;
+        const containerHeight = wordcloud.offsetHeight;
         
-        // Add random initial positions and rotations for a more natural look
-        words.forEach((word, index) => {
-            // Add subtle animation effect for each word
-            word.style.transition = `transform 0.8s ease, color 0.3s ease, opacity 0.5s ease`;
-            
-            // Set initial random position and rotation if using CSS positioning
-            word.style.position = 'absolute';
-            
-            // Add mouse enter/leave events for enhanced hover effect
+        // Position words randomly in the container
+        function positionWords() {
+            words.forEach(word => {
+                // Random position within the container
+                const maxWidth = containerWidth - 120; // account for word width
+                const maxHeight = containerHeight - 40; // account for word height
+                
+                const leftPos = Math.floor(Math.random() * maxWidth);
+                const topPos = Math.floor(Math.random() * maxHeight);
+                
+                word.style.left = `${leftPos}px`;
+                word.style.top = `${topPos}px`;
+            });
+        }
+        
+        // Initially position all words
+        setTimeout(positionWords, 100);
+        
+        // Add mouse enter/leave events for enhanced hover effect
+        words.forEach(word => {
             word.addEventListener('mouseenter', function() {
                 // Random color changes on hover for more dynamic effect
                 const colors = ['#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f39c12', '#1abc9c', '#d35400', '#34495e', '#e67e22', '#8e44ad'];
@@ -163,8 +176,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Enhance the hover effect
                 this.style.color = randomColor;
-                this.style.transform = 'scale(1.3) rotate(5deg)';
-                this.style.zIndex = '10';
+                this.style.transform = 'scale(1.5) rotate(5deg)';
+                this.style.zIndex = '100';
             });
             
             word.addEventListener('mouseleave', function() {
@@ -179,11 +192,15 @@ document.addEventListener('DOMContentLoaded', function() {
         function animateWords() {
             words.forEach(word => {
                 // Randomly select words to animate
-                if (Math.random() > 0.6) { // Animate 40% of words at any time
+                if (Math.random() > 0.7) { // Animate 30% of words at any time
                     // Random floating direction and distance
-                    const xMove = (Math.random() - 0.5) * 10;
-                    const yMove = (Math.random() - 0.5) * 10;
-                    const rotation = (Math.random() - 0.5) * 5;
+                    const xMove = (Math.random() - 0.5) * 30; // Increased movement range
+                    const yMove = (Math.random() - 0.5) * 30;
+                    const rotation = (Math.random() - 0.5) * 10;
+                    
+                    // Save original position
+                    const originalLeft = parseFloat(word.style.left);
+                    const originalTop = parseFloat(word.style.top);
                     
                     // Apply the animation
                     word.style.transform = `translate(${xMove}px, ${yMove}px) rotate(${rotation}deg)`;
@@ -191,15 +208,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Reset position after animation completes
                     setTimeout(() => {
                         word.style.transform = 'translate(0, 0) rotate(0)';
-                    }, 1500);
+                    }, 2000);
                 }
             });
         }
         
         // Initial animation after DOM loads
-        setTimeout(animateWords, 500);
+        setTimeout(animateWords, 1000);
         
         // Run the animation periodically
         setInterval(animateWords, 3000);
+        
+        // Re-position words when window resizes
+        window.addEventListener('resize', function() {
+            const newContainerWidth = wordcloud.offsetWidth;
+            const newContainerHeight = wordcloud.offsetHeight;
+            
+            // Update the container dimensions
+            setTimeout(positionWords, 300);
+        });
     }
 });
