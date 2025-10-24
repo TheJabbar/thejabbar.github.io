@@ -1,4 +1,4 @@
-// FIXED: Framework wordcloud with more reliable collision detection
+// FIXED: Framework wordcloud with better clustering and collision detection
 document.addEventListener('DOMContentLoaded', function() {
     const wordcloud = document.getElementById('frameworks-wordcloud');
     if (!wordcloud) return;
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (words.length === 0) return;
     
     const placedWords = [];
-    const padding = 15;
+    const padding = 12; // Reduced padding for tighter clustering
     
     function positionWords() {
         // Reset all words
@@ -27,7 +27,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const centerX = containerWidth / 2;
         const centerY = containerHeight / 2;
         
-        // Sort words by size (largest first)
+        // Calculate maximum radius to keep words clustered
+        const maxRadius = Math.min(containerWidth, containerHeight) * 0.35; // Tighter cluster
+        
+        // Sort words by size (largest first) to place larger words first
         const sortedWords = [...words].sort((a, b) => {
             // Ensure dimensions are measured after styles are applied
             a.style.visibility = 'hidden';
@@ -47,22 +50,24 @@ document.addEventListener('DOMContentLoaded', function() {
             const wordHeight = rect.height;
             let placed = false;
             
-            // Try spiral placement
-            const maxAttempts = 1500; // Increased attempts
-            const angleStep = 0.2;
-            const radiusStep = 2;
+            // Try spiral placement within the defined max radius
+            const maxAttempts = 1000; // Reasonable number of attempts
+            const angleStep = 0.3; // Slightly larger steps
+            const radiusStep = 1.5; // Smaller radius steps for denser packing
             
             for (let i = 0; i < maxAttempts && !placed; i++) {
+                // Use a spiral pattern that stays within maxRadius
                 const angle = i * angleStep;
-                const radius = i * radiusStep * 0.1;
+                // Use a radius that stays within our maxRadius limit
+                const radius = Math.min(maxRadius * 0.8, (i * radiusStep * 0.15));
                 
                 // Calculate position relative to center
                 const x = centerX + Math.cos(angle) * radius - wordWidth / 2;
                 const y = centerY + Math.sin(angle) * radius - wordHeight / 2;
                 
-                // Boundary checks
-                if (x < 0 || x + wordWidth > containerWidth || 
-                    y < 0 || y + wordHeight > containerHeight) {
+                // Boundary checks to ensure word stays within container
+                if (x < 5 || x + wordWidth + 5 > containerWidth || 
+                    y < 5 || y + wordHeight + 5 > containerHeight) {
                     continue;
                 }
                 
@@ -90,12 +95,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // If still not placed, try a different strategy
+            // If still not placed, try a tighter random clustering approach
             if (!placed) {
-                // Try random positions in less crowded areas
-                for (let attempt = 0; attempt < 200 && !placed; attempt++) {
-                    const x = Math.random() * (containerWidth - wordWidth - 10) + 5;
-                    const y = Math.random() * (containerHeight - wordHeight - 10) + 5;
+                // Try positions within a more centralized area
+                for (let attempt = 0; attempt < 300 && !placed; attempt++) {
+                    // Generate a position within a tighter radius
+                    const angle = Math.random() * 2 * Math.PI;
+                    const distance = Math.random() * maxRadius * 0.9; // Even tighter than max radius
+                    
+                    const x = centerX + Math.cos(angle) * distance - wordWidth / 2;
+                    const y = centerY + Math.sin(angle) * distance - wordHeight / 2;
+                    
+                    // Boundary checks
+                    if (x < 5 || x + wordWidth + 5 > containerWidth || 
+                        y < 5 || y + wordHeight + 5 > containerHeight) {
+                        continue;
+                    }
                     
                     const hasCollision = placedWords.some(placed => {
                         return !(x + wordWidth < placed.left - padding ||
@@ -121,13 +136,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // As a last resort, place it anyway but mark it
+            // As a last resort, place it in the central area anyway
             if (!placed) {
                 console.warn(`Could not place word without collision: ${word.textContent}`);
-                // Position in top-left as fallback
-                word.style.left = '5px';
-                word.style.top = `${5 + (placedWords.length * 25)}px`;
+                // Find an approximate open area near the center
+                word.style.left = `${centerX - wordWidth / 2}px`;
+                word.style.top = `${centerY - wordHeight / 2 + (placedWords.length * 15 % 50) - 25}px`;
                 word.style.visibility = 'visible';
+                placed = true; // Mark as placed to continue
+                
+                placedWords.push({
+                    left: centerX - wordWidth / 2,
+                    top: centerY - wordHeight / 2 + (placedWords.length * 15 % 50) - 25,
+                    right: centerX + wordWidth / 2,
+                    bottom: centerY + wordHeight / 2 + (placedWords.length * 15 % 50) - 25
+                });
             }
         });
     }
@@ -150,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         words.forEach(word => {
             word.addEventListener('mouseenter', function() {
-                const colors = ['#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f39c12'];
+                const colors = ['#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f39c12', '#1abc9c', '#d35400', '#34495e', '#e67e22', '#8e44ad'];
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
                 
                 this.style.color = randomColor;
