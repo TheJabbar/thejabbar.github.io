@@ -1,4 +1,4 @@
-// FIXED: Framework wordcloud with better clustering and collision detection
+// FIXED: Framework wordcloud with balanced clustering and collision detection
 document.addEventListener('DOMContentLoaded', function() {
     const wordcloud = document.getElementById('frameworks-wordcloud');
     if (!wordcloud) return;
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (words.length === 0) return;
     
     const placedWords = [];
-    const padding = 12; // Reduced padding for tighter clustering
+    const padding = 18; // Increased padding to prevent overlapping
     
     function positionWords() {
         // Reset all words
@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const centerX = containerWidth / 2;
         const centerY = containerHeight / 2;
         
-        // Calculate maximum radius to keep words clustered
-        const maxRadius = Math.min(containerWidth, containerHeight) * 0.35; // Tighter cluster
+        // Calculate a reasonable radius that balances clustering and spacing
+        const maxRadius = Math.min(containerWidth, containerHeight) * 0.45; // Larger radius for better spacing
         
         // Sort words by size (largest first) to place larger words first
         const sortedWords = [...words].sort((a, b) => {
@@ -50,24 +50,24 @@ document.addEventListener('DOMContentLoaded', function() {
             const wordHeight = rect.height;
             let placed = false;
             
-            // Try spiral placement within the defined max radius
-            const maxAttempts = 1000; // Reasonable number of attempts
-            const angleStep = 0.3; // Slightly larger steps
-            const radiusStep = 1.5; // Smaller radius steps for denser packing
+            // Try spiral placement with proper spacing
+            const maxAttempts = 2000; // More attempts to find a good position
+            const angleStep = 0.15; // Finer steps for better coverage
+            const radiusStep = 1.2; // Small steps for dense placement
             
             for (let i = 0; i < maxAttempts && !placed; i++) {
-                // Use a spiral pattern that stays within maxRadius
+                // Use a spiral pattern with sufficient spacing
                 const angle = i * angleStep;
-                // Use a radius that stays within our maxRadius limit
-                const radius = Math.min(maxRadius * 0.8, (i * radiusStep * 0.15));
+                // Calculate radius to stay within our maxRadius but allow for proper spacing
+                const radius = Math.min(maxRadius * 0.9, i * radiusStep * 0.1);
                 
                 // Calculate position relative to center
-                const x = centerX + Math.cos(angle) * radius - wordWidth / 2;
-                const y = centerY + Math.sin(angle) * radius - wordHeight / 2;
+                let x = centerX + Math.cos(angle) * radius - wordWidth / 2;
+                let y = centerY + Math.sin(angle) * radius - wordHeight / 2;
                 
-                // Boundary checks to ensure word stays within container
-                if (x < 5 || x + wordWidth + 5 > containerWidth || 
-                    y < 5 || y + wordHeight + 5 > containerHeight) {
+                // Boundary checks to ensure word stays within container with margin
+                if (x < 10 || x + wordWidth + 10 > containerWidth || 
+                    y < 10 || y + wordHeight + 10 > containerHeight) {
                     continue;
                 }
                 
@@ -95,62 +95,74 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // If still not placed, try a tighter random clustering approach
+            // If still not placed using spiral, try grid-based placement in the central area
             if (!placed) {
-                // Try positions within a more centralized area
-                for (let attempt = 0; attempt < 300 && !placed; attempt++) {
-                    // Generate a position within a tighter radius
-                    const angle = Math.random() * 2 * Math.PI;
-                    const distance = Math.random() * maxRadius * 0.9; // Even tighter than max radius
-                    
-                    const x = centerX + Math.cos(angle) * distance - wordWidth / 2;
-                    const y = centerY + Math.sin(angle) * distance - wordHeight / 2;
-                    
-                    // Boundary checks
-                    if (x < 5 || x + wordWidth + 5 > containerWidth || 
-                        y < 5 || y + wordHeight + 5 > containerHeight) {
-                        continue;
-                    }
-                    
-                    const hasCollision = placedWords.some(placed => {
-                        return !(x + wordWidth < placed.left - padding ||
-                                 x > placed.right + padding ||
-                                 y + wordHeight < placed.top - padding ||
-                                 y > placed.bottom + padding);
-                    });
-                    
-                    if (!hasCollision) {
-                        word.style.left = `${x}px`;
-                        word.style.top = `${y}px`;
-                        word.style.visibility = 'visible';
+                // Use a grid-based approach within the central area
+                const gridSize = 120; // Size of each grid cell
+                const cols = Math.floor(containerWidth / gridSize);
+                const rows = Math.floor(containerHeight / gridSize);
+                
+                for (let row = 0; row < rows && !placed; row++) {
+                    for (let col = 0; col < cols && !placed; col++) {
+                        // Calculate grid position
+                        let x = col * gridSize + (gridSize - wordWidth) / 2;
+                        let y = row * gridSize + (gridSize - wordHeight) / 2;
                         
-                        placedWords.push({
-                            left: x,
-                            top: y,
-                            right: x + wordWidth,
-                            bottom: y + wordHeight
+                        // Center the grid around the center of the container
+                        x = x - (cols * gridSize) / 2 + centerX;
+                        y = y - (rows * gridSize) / 2 + centerY;
+                        
+                        // Boundary checks
+                        if (x < 5 || x + wordWidth + 5 > containerWidth || 
+                            y < 5 || y + wordHeight + 5 > containerHeight) {
+                            continue;
+                        }
+                        
+                        const hasCollision = placedWords.some(placed => {
+                            return !(x + wordWidth < placed.left - padding ||
+                                     x > placed.right + padding ||
+                                     y + wordHeight < placed.top - padding ||
+                                     y > placed.bottom + padding);
                         });
                         
-                        placed = true;
+                        if (!hasCollision) {
+                            word.style.left = `${x}px`;
+                            word.style.top = `${y}px`;
+                            word.style.visibility = 'visible';
+                            
+                            placedWords.push({
+                                left: x,
+                                top: y,
+                                right: x + wordWidth,
+                                bottom: y + wordHeight
+                            });
+                            
+                            placed = true;
+                        }
                     }
                 }
             }
             
-            // As a last resort, place it in the central area anyway
+            // As a last resort, place it with minimum overlap
             if (!placed) {
                 console.warn(`Could not place word without collision: ${word.textContent}`);
-                // Find an approximate open area near the center
-                word.style.left = `${centerX - wordWidth / 2}px`;
-                word.style.top = `${centerY - wordHeight / 2 + (placedWords.length * 15 % 50) - 25}px`;
+                // Place at a fixed position in the grid as a last resort
+                const idx = placedWords.length;
+                const x = centerX - 100 + (idx % 4) * 50;
+                const y = centerY - 50 + Math.floor(idx / 4) * 40;
+                
+                word.style.left = `${x}px`;
+                word.style.top = `${y}px`;
                 word.style.visibility = 'visible';
-                placed = true; // Mark as placed to continue
                 
                 placedWords.push({
-                    left: centerX - wordWidth / 2,
-                    top: centerY - wordHeight / 2 + (placedWords.length * 15 % 50) - 25,
-                    right: centerX + wordWidth / 2,
-                    bottom: centerY + wordHeight / 2 + (placedWords.length * 15 % 50) - 25
+                    left: x,
+                    top: y,
+                    right: x + wordWidth,
+                    bottom: y + wordHeight
                 });
+                
+                placed = true;
             }
         });
     }
