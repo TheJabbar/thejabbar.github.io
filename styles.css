@@ -591,53 +591,54 @@ section {
 }
 
 .tech-text:hover {
-  fill: #f39c12 !important; /* Highlight color on hover */
+  fill: #FFD700 !important; /* Gold highlight on hover */
   font-size: 20px !important;
   transform: scale(1.2);
+  filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
 }
 
-/* Style classes matching the original SVG example */
-.st0 { fill: #4D4D4D; font-size: 16px; }
-.st1 { fill: #EA6B6B; font-size: 24px; }
-.st2 { fill: #83A849; font-size: 18px; }
-.st3 { fill: #A8499C; font-size: 20px; }
-.st4 { fill: #49A8A8; font-size: 22px; }
-.st5 { fill: #7C7C7C; font-size: 14px; }
-.st6 { fill: #E1A34D; font-size: 18px; }
-.st7 { fill: #CA5353; font-size: 16px; }
-.st8 { fill: #53CA53; font-size: 26px; }
-.st9 { fill: #5353CA; font-size: 14px; }
-.st10 { fill: #CACACA; font-size: 18px; }
-.st11 { fill: #A34DE1; font-size: 16px; }
-.st12 { fill: #4DA3E1; font-size: 20px; }
-.st13 { fill: #E14DA3; font-size: 22px; }
-.st14 { fill: #4DE1A3; font-size: 19px; }
-.st15 { fill: #A3E14D; font-size: 17px; }
-.st16 { fill: #E1D44D; font-size: 21px; }
-.st17 { fill: #D44DE1; font-size: 15px; }
-.st18 { fill: #4DE1D4; font-size: 23px; }
-.st19 { fill: #E14D6A; font-size: 17px; }
-.st20 { fill: #E16A4D; font-size: 25px; }
-.st21 { fill: #6AE14D; font-size: 19px; }
-.st22 { fill: #4DE16A; font-size: 21px; }
-.st23 { fill: #6A4DE1; font-size: 15px; }
-.st24 { fill: #E14D88; font-size: 18px; }
-.st25 { fill: #88E14D; font-size: 20px; }
-.st26 { fill: #4D88E1; font-size: 16px; }
-.st27 { fill: #E1884D; font-size: 22px; }
-.st28 { fill: #884DE1; font-size: 14px; }
-.st29 { fill: #E14D4D; font-size: 24px; }
-.st30 { fill: #4DE188; font-size: 18px; }
-.st31 { fill: #4D6AE1; font-size: 26px; }
+/* Vibrant color scheme for SVG wordcloud */
+.st0 { fill: #FF6B6B; font-size: 16px; } /* Red */
+.st1 { fill: #4ECDC4; font-size: 24px; } /* Turquoise */
+.st2 { fill: #45B7D1; font-size: 18px; } /* Blue */
+.st3 { fill: #FFBE0B; font-size: 20px; } /* Yellow */
+.st4 { fill: #FB5607; font-size: 22px; } /* Orange */
+.st5 { fill: #8338EC; font-size: 14px; } /* Purple */
+.st6 { fill: #3A86FF; font-size: 18px; } /* Light Blue */
+.st7 { fill: #FF006E; font-size: 16px; } /* Pink */
+.st8 { fill: #8AC926; font-size: 26px; } /* Green */
+.st9 { fill: #7209B7; font-size: 14px; } /* Dark Purple */
+.st10 { fill: #F15BB5; font-size: 18px; } /* Magenta */
+.st11 { fill: #00BBF9; font-size: 16px; } /* Sky Blue */
+.st12 { fill: #00F5D4; font-size: 20px; } /* Mint */
+.st13 { fill: #FEE447; font-size: 22px; } /* Lemon */
+.st14 { fill: #9B5DE5; font-size: 19px; } /* Purple Blue */
+.st15 { fill: #00F0FF; font-size: 17px; } /* Cyan */
+.st16 { fill: #FF9F1C; font-size: 21px; } /* Orange Yellow */
+.st17 { fill: #E63946; font-size: 15px; } /* Red */
+.st18 { fill: #2A9D8F; font-size: 23px; } /* Teal */
+.st19 { fill: #F4A261; font-size: 17px; } /* Light Orange */
+.st20 { fill: #E76F51; font-size: 25px; } /* Copper */
+.st21 { fill: #2A9D8F; font-size: 19px; } /* Sea Green */
+.st22 { fill: #F72585; font-size: 18px; } /* Hot Pink */
+.st23 { fill: #7209B7; font-size: 15px; } /* Violet */
+.st24 { fill: #B5179E; font-size: 18px; } /* Purple Pink */
+.st25 { fill: #560BAD; font-size: 20px; } /* Royal Purple */
+.st26 { fill: #4361EE; font-size: 16px; } /* Dodger Blue */
+.st27 { fill: #4CC9F0; font-size: 22px; } /* Light Blue */
+.st28 { fill: #90E0EF; font-size: 14px; } /* Light Blue */
+.st29 { fill: #00F5D4; font-size: 24px; } /* Mint */
+.st30 { fill: #9B5DE5; font-size: 18px; } /* Purple */
+.st31 { fill: #F15BB5; font-size: 26px; } /* Fuchsia */
 
 .blink {
   animation: blink 2s ease-out infinite;
 }
 
 @keyframes blink {
-  0% { opacity: 1; }
-  50% { opacity: 0.7; }
-  100% { opacity: 1; }
+  0% { opacity: 1; filter: brightness(1); }
+  50% { opacity: 0.8; filter: brightness(1.3); }
+  100% { opacity: 1; filter: brightness(1); }
 }
 
 /* Publications Section */
