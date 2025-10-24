@@ -1,4 +1,4 @@
-// FIXED: Framework wordcloud with balanced clustering and collision detection
+// FIXED: Framework wordcloud with iterative collision resolution
 document.addEventListener('DOMContentLoaded', function() {
     const wordcloud = document.getElementById('frameworks-wordcloud');
     if (!wordcloud) return;
@@ -6,12 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const words = Array.from(wordcloud.querySelectorAll('.word'));
     if (words.length === 0) return;
     
-    const placedWords = [];
-    const padding = 18; // Increased padding to prevent overlapping
+    const padding = 20; // Increased padding to prevent overlapping
     
     function positionWords() {
         // Reset all words
-        placedWords.length = 0;
         words.forEach(word => {
             word.style.visibility = 'hidden';
             word.style.position = 'absolute';
@@ -28,11 +26,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const centerY = containerHeight / 2;
         
         // Calculate a reasonable radius that balances clustering and spacing
-        const maxRadius = Math.min(containerWidth, containerHeight) * 0.45; // Larger radius for better spacing
+        const maxRadius = Math.min(containerWidth, containerHeight) * 0.4;
         
         // Sort words by size (largest first) to place larger words first
         const sortedWords = [...words].sort((a, b) => {
-            // Ensure dimensions are measured after styles are applied
             a.style.visibility = 'hidden';
             b.style.visibility = 'hidden';
             const aRect = a.getBoundingClientRect();
@@ -42,129 +39,107 @@ document.addEventListener('DOMContentLoaded', function() {
             return bSize - aSize;
         });
         
-        sortedWords.forEach(word => {
+        // Place all words in a central area with minimal overlap possibility
+        sortedWords.forEach((word, index) => {
             // Ensure accurate measurements
             word.style.visibility = 'hidden';
             const rect = word.getBoundingClientRect();
             const wordWidth = rect.width;
             const wordHeight = rect.height;
-            let placed = false;
             
-            // Try spiral placement with proper spacing
-            const maxAttempts = 2000; // More attempts to find a good position
-            const angleStep = 0.15; // Finer steps for better coverage
-            const radiusStep = 1.2; // Small steps for dense placement
+            // Determine grid dimensions based on word count
+            const gridSize = Math.ceil(Math.sqrt(words.length));
+            // Calculate cell size to ensure words fit with padding
+            const cellSize = Math.max(120, Math.min(180, Math.min(containerWidth, containerHeight) / gridSize));
             
-            for (let i = 0; i < maxAttempts && !placed; i++) {
-                // Use a spiral pattern with sufficient spacing
-                const angle = i * angleStep;
-                // Calculate radius to stay within our maxRadius but allow for proper spacing
-                const radius = Math.min(maxRadius * 0.9, i * radiusStep * 0.1);
+            // Calculate grid position
+            const col = index % gridSize;
+            const row = Math.floor(index / gridSize);
+            
+            // Calculate position with centering
+            let x = centerX + (col - (gridSize-1)/2) * cellSize;
+            let y = centerY + (row - (gridSize-1)/2) * cellSize;
+            
+            // Add some randomization within the cell to make it look more natural
+            const randX = (Math.random() - 0.5) * (cellSize - wordWidth - 20);
+            const randY = (Math.random() - 0.5) * (cellSize - wordHeight - 20);
+            
+            x = x - wordWidth/2 + randX;
+            y = y - wordHeight/2 + randY;
+            
+            // Ensure boundaries
+            x = Math.max(10, Math.min(containerWidth - wordWidth - 10, x));
+            y = Math.max(10, Math.min(containerHeight - wordHeight - 10, y));
+            
+            word.style.left = `${x}px`;
+            word.style.top = `${y}px`;
+            word.style.visibility = 'visible';
+        });
+        
+        // Then resolve any remaining collisions iteratively 
+        resolveCollisions();
+    }
+    
+    // Function to resolve collisions iteratively
+    function resolveCollisions() {
+        const maxIterations = 10; // Limit iterations to prevent infinite loops
+        
+        for (let iter = 0; iter < maxIterations; iter++) {
+            let anyCollision = false;
+            
+            for (let i = 0; i < words.length; i++) {
+                const word1 = words[i];
+                if (word1.style.visibility !== 'visible') continue;
                 
-                // Calculate position relative to center
-                let x = centerX + Math.cos(angle) * radius - wordWidth / 2;
-                let y = centerY + Math.sin(angle) * radius - wordHeight / 2;
+                const rect1 = word1.getBoundingClientRect();
+                const word1Left = parseFloat(word1.style.left) || 0;
+                const word1Top = parseFloat(word1.style.top) || 0;
                 
-                // Boundary checks to ensure word stays within container with margin
-                if (x < 10 || x + wordWidth + 10 > containerWidth || 
-                    y < 10 || y + wordHeight + 10 > containerHeight) {
-                    continue;
-                }
-                
-                // Collision detection
-                const hasCollision = placedWords.some(placed => {
-                    return !(x + wordWidth < placed.left - padding ||
-                             x > placed.right + padding ||
-                             y + wordHeight < placed.top - padding ||
-                             y > placed.bottom + padding);
-                });
-                
-                if (!hasCollision) {
-                    word.style.left = `${x}px`;
-                    word.style.top = `${y}px`;
-                    word.style.visibility = 'visible';
+                for (let j = i + 1; j < words.length; j++) {
+                    const word2 = words[j];
+                    if (word2.style.visibility !== 'visible') continue;
                     
-                    placedWords.push({
-                        left: x,
-                        top: y,
-                        right: x + wordWidth,
-                        bottom: y + wordHeight
-                    });
+                    const rect2 = word2.getBoundingClientRect();
+                    const word2Left = parseFloat(word2.style.left) || 0;
+                    const word2Top = parseFloat(word2.style.top) || 0;
                     
-                    placed = true;
-                }
-            }
-            
-            // If still not placed using spiral, try grid-based placement in the central area
-            if (!placed) {
-                // Use a grid-based approach within the central area
-                const gridSize = 120; // Size of each grid cell
-                const cols = Math.floor(containerWidth / gridSize);
-                const rows = Math.floor(containerHeight / gridSize);
-                
-                for (let row = 0; row < rows && !placed; row++) {
-                    for (let col = 0; col < cols && !placed; col++) {
-                        // Calculate grid position
-                        let x = col * gridSize + (gridSize - wordWidth) / 2;
-                        let y = row * gridSize + (gridSize - wordHeight) / 2;
+                    // Check for collision
+                    if (word1Left < word2Left + rect2.width + padding &&
+                        word1Left + rect1.width + padding > word2Left &&
+                        word1Top < word2Top + rect2.height + padding &&
+                        word1Top + rect1.height + padding > word2Top) {
                         
-                        // Center the grid around the center of the container
-                        x = x - (cols * gridSize) / 2 + centerX;
-                        y = y - (rows * gridSize) / 2 + centerY;
+                        // Calculate repulsion vector
+                        const dx = (word1Left + rect1.width/2) - (word2Left + rect2.width/2);
+                        const dy = (word1Top + rect1.height/2) - (word2Top + rect2.height/2);
                         
-                        // Boundary checks
-                        if (x < 5 || x + wordWidth + 5 > containerWidth || 
-                            y < 5 || y + wordHeight + 5 > containerHeight) {
-                            continue;
-                        }
+                        // Avoid division by zero
+                        const distance = Math.max(0.1, Math.sqrt(dx*dx + dy*dy));
+                        const force = 1.0; // Repulsion strength
                         
-                        const hasCollision = placedWords.some(placed => {
-                            return !(x + wordWidth < placed.left - padding ||
-                                     x > placed.right + padding ||
-                                     y + wordHeight < placed.top - padding ||
-                                     y > placed.bottom + padding);
-                        });
+                        // Calculate normalized direction
+                        const moveX = (dx / distance) * force * 10; // Scale factor
+                        const moveY = (dy / distance) * force * 10;
                         
-                        if (!hasCollision) {
-                            word.style.left = `${x}px`;
-                            word.style.top = `${y}px`;
-                            word.style.visibility = 'visible';
-                            
-                            placedWords.push({
-                                left: x,
-                                top: y,
-                                right: x + wordWidth,
-                                bottom: y + wordHeight
-                            });
-                            
-                            placed = true;
-                        }
+                        // Move both words apart (with limits to stay in container)
+                        const newLeft1 = Math.max(5, Math.min(containerWidth - rect1.width - 5, word1Left + moveX/2));
+                        const newTop1 = Math.max(5, Math.min(containerHeight - rect1.height - 5, word1Top + moveY/2));
+                        const newLeft2 = Math.max(5, Math.min(containerWidth - rect2.width - 5, word2Left - moveX/2));
+                        const newTop2 = Math.max(5, Math.min(containerHeight - rect2.height - 5, word2Top - moveY/2));
+                        
+                        word1.style.left = `${newLeft1}px`;
+                        word1.style.top = `${newTop1}px`;
+                        word2.style.left = `${newLeft2}px`;
+                        word2.style.top = `${newTop2}px`;
+                        
+                        anyCollision = true;
                     }
                 }
             }
             
-            // As a last resort, place it with minimum overlap
-            if (!placed) {
-                console.warn(`Could not place word without collision: ${word.textContent}`);
-                // Place at a fixed position in the grid as a last resort
-                const idx = placedWords.length;
-                const x = centerX - 100 + (idx % 4) * 50;
-                const y = centerY - 50 + Math.floor(idx / 4) * 40;
-                
-                word.style.left = `${x}px`;
-                word.style.top = `${y}px`;
-                word.style.visibility = 'visible';
-                
-                placedWords.push({
-                    left: x,
-                    top: y,
-                    right: x + wordWidth,
-                    bottom: y + wordHeight
-                });
-                
-                placed = true;
-            }
-        });
+            // If no collisions were found, we're done
+            if (!anyCollision) break;
+        }
     }
     
     // Wait for images and fonts to load before positioning
