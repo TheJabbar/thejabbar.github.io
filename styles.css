@@ -571,6 +571,75 @@ section {
   opacity: 1 !important;
 }
 
+/* SVG Wordcloud Styles */
+.svg-wordcloud {
+  width: 100%;
+  max-width: 800px;
+  height: 400px;
+  margin: 0 auto;
+  display: block;
+}
+
+.tech-text {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: default;
+  user-select: none;
+  transition: all 0.3s ease;
+  text-anchor: middle;
+}
+
+.tech-text:hover {
+  fill: #f39c12 !important; /* Highlight color on hover */
+  font-size: 20px !important;
+  transform: scale(1.2);
+}
+
+/* Style classes matching the original SVG example */
+.st0 { fill: #4D4D4D; font-size: 16px; }
+.st1 { fill: #EA6B6B; font-size: 24px; }
+.st2 { fill: #83A849; font-size: 18px; }
+.st3 { fill: #A8499C; font-size: 20px; }
+.st4 { fill: #49A8A8; font-size: 22px; }
+.st5 { fill: #7C7C7C; font-size: 14px; }
+.st6 { fill: #E1A34D; font-size: 18px; }
+.st7 { fill: #CA5353; font-size: 16px; }
+.st8 { fill: #53CA53; font-size: 26px; }
+.st9 { fill: #5353CA; font-size: 14px; }
+.st10 { fill: #CACACA; font-size: 18px; }
+.st11 { fill: #A34DE1; font-size: 16px; }
+.st12 { fill: #4DA3E1; font-size: 20px; }
+.st13 { fill: #E14DA3; font-size: 22px; }
+.st14 { fill: #4DE1A3; font-size: 19px; }
+.st15 { fill: #A3E14D; font-size: 17px; }
+.st16 { fill: #E1D44D; font-size: 21px; }
+.st17 { fill: #D44DE1; font-size: 15px; }
+.st18 { fill: #4DE1D4; font-size: 23px; }
+.st19 { fill: #E14D6A; font-size: 17px; }
+.st20 { fill: #E16A4D; font-size: 25px; }
+.st21 { fill: #6AE14D; font-size: 19px; }
+.st22 { fill: #4DE16A; font-size: 21px; }
+.st23 { fill: #6A4DE1; font-size: 15px; }
+.st24 { fill: #E14D88; font-size: 18px; }
+.st25 { fill: #88E14D; font-size: 20px; }
+.st26 { fill: #4D88E1; font-size: 16px; }
+.st27 { fill: #E1884D; font-size: 22px; }
+.st28 { fill: #884DE1; font-size: 14px; }
+.st29 { fill: #E14D4D; font-size: 24px; }
+.st30 { fill: #4DE188; font-size: 18px; }
+.st31 { fill: #4D6AE1; font-size: 26px; }
+
+.blink {
+  animation: blink 2s ease-out infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
 /* Publications Section */
 .publications {
   background-color: var(--bg-color);
