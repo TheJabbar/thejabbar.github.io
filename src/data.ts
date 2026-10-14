@@ -36,7 +36,7 @@ export const experiences: Experience[] = [
     summary:
       'Managed Services (MS) Division: build automation and AI use cases for internal operations and NTT Data clients.',
     highlights: [
-      'Design and ship automation + AI use cases for MS internal operations (ticket triage, runbook automation, reporting).',
+      'Design and ship automation + AI use cases for MS internal operations (ticket triage, automation and report dashboard).',
       'Deliver AI solutions for clients: GenAI chatbots, RAG over enterprise docs, and document-intelligence pipelines.',
       'Build and maintain API deployments on cloud / Kubernetes and Azure environments, incl. monitoring and handover docs.',
       'Prototype LLM agents and evals, then harden the winners into supportable managed services.',
@@ -106,13 +106,13 @@ export const skillGroups: SkillGroup[] = [
     id: 'ai-automation',
     label: 'Automation & Applied AI',
     icon: 'fas fa-robot',
-    blurb: 'What I do now in MS: automate ops work and ship AI use cases.',
+    blurb: 'Applied AI in production: automating ops work and shipping AI use cases.',
     skills: [
       { name: 'GenAI chatbots & agents', level: 'Core' },
       { name: 'RAG / Advanced RAG', level: 'Core' },
-      { name: 'Runbook & ticket automation', level: 'Core' },
+      { name: 'LLM evals & prompt design', level: 'Core' },
+      { name: 'triage and automation development', level: 'Core' },
       { name: 'Document intelligence / OCR', level: 'Proficient' },
-      { name: 'LLM evals & prompt design', level: 'Proficient' },
     ],
   },
   {
@@ -122,9 +122,9 @@ export const skillGroups: SkillGroup[] = [
     blurb: 'Modeling background behind the automation.',
     skills: [
       { name: 'Python (pandas, NumPy, scikit-learn)', level: 'Core' },
+      { name: 'NLP/NLU Implementation', level: 'Core' },
       { name: 'PyTorch / TensorFlow', level: 'Proficient' },
       { name: 'Transformers / LSTM', level: 'Proficient' },
-      { name: 'Sentiment, topic models, summarization', level: 'Proficient' },
     ],
   },
   {
@@ -134,10 +134,10 @@ export const skillGroups: SkillGroup[] = [
     blurb: 'How it runs reliably for internal teams and clients.',
     skills: [
       { name: 'FastAPI service APIs', level: 'Core' },
-      { name: 'Docker / Kubernetes', level: 'Proficient' },
+      { name: 'SQL / MongoDB', level: 'Core' },
+      { name: 'Docker / Kubernetes', level: 'Core' },
       { name: 'Azure (AI Services, OpenAI, ML)', level: 'Proficient' },
       { name: 'CI/CD, Git, monitoring', level: 'Working' },
-      { name: 'SQL / MongoDB', level: 'Working' },
     ],
   },
   {
@@ -147,7 +147,7 @@ export const skillGroups: SkillGroup[] = [
     blurb: 'Frameworks currently in use.',
     skills: [
       { name: 'LangChain / LangGraph', level: 'Core' },
-      { name: 'vLLM / OpenAI APIs', level: 'Proficient' },
+      { name: 'Local and Cloud LLM Framework', level: 'Proficient' },
       { name: 'Streamlit / Gradio / Chainlit', level: 'Proficient' },
       { name: 'PySpark / Hadoop', level: 'Working' },
     ],
@@ -156,8 +156,8 @@ export const skillGroups: SkillGroup[] = [
 
 export const profile = {
   name: 'Muhammad Abdul Jabbar',
-  title: 'MS Engineer (L2) — Automation & AI @ NTT Data',
-  tagline: 'Automation and AI use cases for Managed Services — internal ops and client delivery.',
+  title: 'Enterprise AI & Machine Learning Professional',
+  tagline: 'Enterprise AI and machine learning across banking, telecom, and managed services — from ML models to production GenAI and automation.',
   location: 'Jakarta, Indonesia',
   phone: '+6282119101825',
   email: 'abdul.jabbar.3794@gmail.com',
