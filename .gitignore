@@ -209,3 +209,7 @@ __marimo__/
 #AI Scripts
 *extract_publications.py
 *extract_publications2.py
+# Node / Vite
+node_modules/
+dist/
+*.local
