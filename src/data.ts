@@ -154,6 +154,35 @@ export const skillGroups: SkillGroup[] = [
   },
 ];
 
+export interface Project {
+  title: string;
+  description: string;
+  tech: string[];
+  link?: string;
+}
+
+// Edit here — add your repos/demos. Renders into #portfolio section.
+export const projects: Project[] = [
+  {
+    title: 'Enterprise RAG Chatbot',
+    description: 'GenAI chatbot over enterprise docs with Advanced RAG, evals, and FastAPI + Kubernetes deployment.',
+    tech: ['LangChain', 'Azure OpenAI', 'FastAPI', 'Kubernetes'],
+    link: 'https://github.com/thejabbar',
+  },
+  {
+    title: 'Document Intelligence Pipeline',
+    description: 'OCR + LLM extraction pipeline turning PDFs into structured data with human-in-the-loop review.',
+    tech: ['Python', 'GenAI OCR', 'Streamlit', 'Docker'],
+    link: 'https://github.com/thejabbar',
+  },
+  {
+    title: 'Ticket Triage Automation',
+    description: 'Automation for MS operations: ticket classification, routing, and reporting dashboards.',
+    tech: ['Power Automate', 'Python', 'SQL'],
+    link: 'https://github.com/thejabbar',
+  },
+];
+
 export const profile = {
   name: 'Muhammad Abdul Jabbar',
   title: 'Enterprise AI & Machine Learning Professional',

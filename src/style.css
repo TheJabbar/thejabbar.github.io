@@ -120,6 +120,13 @@ nav { position: fixed; inset: 0 0 auto 0; background: rgba(255,255,255,.95); bac
 /* Contact */
 .contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 2rem; }
 .contact-card { background: var(--bg); border: 1px solid var(--border); padding: 1.8rem; border-radius: var(--radius); box-shadow: var(--shadow); }
+/* Portfolio page: distinct dark hero, own spacing — cards reused */
+.hero-portfolio { min-height: 52vh; background: linear-gradient(135deg, #1f2937, #2563eb); }
+.hero-portfolio .hero-content h1, .hero-portfolio .hero-content p { color: #fff; }
+.hero-portfolio code { color: #fff; }
+.portfolio-grid { padding: 64px 0 90px; }
+#projectGrid .tech-tags { margin: 1rem 0; }
+.project-link { margin: 0; font-weight: 600; }
 .contact-row { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.2rem; color: var(--muted); }
 .contact-row i { width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; }
 .form-group { margin-bottom: 1.1rem; }
